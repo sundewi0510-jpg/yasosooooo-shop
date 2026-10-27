@@ -1,10 +1,10 @@
+
 <!doctype html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>yasosooooo | ร้านการ์ดและของสะสม</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#fffafd;color:#493b48}
@@ -16,9 +16,11 @@ button{padding:10px 14px;border:0;border-radius:9px;background:#eac9df;color:#49
 input,select,textarea{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #e3cddd;border-radius:8px;font:inherit}
 #products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .product,.panel{background:white;border:1px solid #f0dce9;border-radius:14px;padding:12px}
+.product{cursor:pointer}
 .product img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff8fc;border-radius:9px}
 .price{color:#b45d91;font-weight:bold}
 .hidden{display:none!important}
+#detailImage{width:100%;max-width:400px;aspect-ratio:1;object-fit:contain}
 @media(min-width:650px){#products{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
@@ -27,179 +29,265 @@ input,select,textarea{width:100%;padding:11px;margin:6px 0 12px;border:1px solid
 <h1>yasosooooo</h1>
 <p>ร้านการ์ดและของสะสมแฟนด้อม ♡</p>
 </header>
+
 <nav>
 <button onclick="show('shop')">หน้าร้าน</button>
 <button onclick="show('cart')">ตะกร้า (<span id="count">0</span>)</button>
 <button onclick="show('orders')">แจ้งชำระเงิน</button>
 <button onclick="show('admin')">จัดการสินค้า</button>
 </nav>
+
 <main>
 <section id="shop">
 <h2>สินค้า</h2>
 <select id="category" onchange="render()">
 <option value="">ทุกหมวดหมู่</option>
-<option>การ์ด</option><option>โฟโต้การ์ด</option><option>ของสะสม</option>
+<option>การ์ด</option>
+<option>โฟโต้การ์ด</option>
+<option>ของสะสม</option>
 </select>
 <div id="products"></div>
 </section>
+
+<section id="detail" class="hidden">
+<button onclick="show('shop')">← กลับหน้าร้าน</button>
+<div class="panel">
+<img id="detailImage" alt="รูปสินค้า">
+<h2 id="detailName"></h2>
+<p class="price" id="detailPrice"></p>
+<p id="detailCategory"></p>
+<button id="detailAdd">เพิ่มลงตะกร้า</button>
+</div>
+</section>
+
 <section id="cart" class="hidden">
-<h2>ตะกร้าสินค้า</h2><div id="cartItems"></div>
+<h2>ตะกร้าสินค้า</h2>
+<div id="cartItems"></div>
 <p>ยอดรวม ฿<span id="total">0</span></p>
 <div class="panel">
+<h3>ข้อมูลจัดส่ง</h3>
 <input id="buyer" placeholder="ชื่อผู้รับ">
 <input id="phone" placeholder="เบอร์โทรศัพท์">
 <textarea id="address" placeholder="ที่อยู่จัดส่ง"></textarea>
 <button onclick="checkout()">ยืนยันคำสั่งซื้อ</button>
 </div>
 </section>
+
 <section id="orders" class="hidden">
 <h2>แจ้งชำระเงิน</h2>
 <div class="panel">
 <p>ธนาคาร KBANK (กสิกรไทย)</p>
 <p>ชื่อบัญชี NARINPORN KANDEE</p>
-<p>กรุณาตรวจสอบเลขบัญชีจากทางร้านก่อนโอนเงิน</p>
+<p class="small">กรุณาตรวจสอบเลขบัญชีจากทางร้านก่อนโอนเงิน</p>
 <input id="orderId" placeholder="เลขคำสั่งซื้อ">
 <input id="slip" type="file" accept="image/*">
-<button onclick="submitPayment()">ส่งหลักฐาน</button>
+<button onclick="submitPayment()">แจ้งชำระเงิน</button>
 <p id="paymentMessage"></p>
 </div>
 </section>
+
 <section id="admin" class="hidden">
 <h2>จัดการสินค้า</h2>
 <div class="panel">
 <input id="pname" placeholder="ชื่อสินค้า">
-<input id="pprice" type="number" min="0" placeholder="ราคา">
-<select id="pcategory"><option>การ์ด</option><option>โฟโต้การ์ด</option><option>ของสะสม</option></select>
+<input id="pprice" type="number" min="0" placeholder="ราคา (บาท)">
+<select id="pcategory">
+<option>การ์ด</option>
+<option>โฟโต้การ์ด</option>
+<option>ของสะสม</option>
+</select>
 <input id="pimage" type="file" accept="image/*">
 <button onclick="addProduct()">เพิ่มสินค้า</button>
 </div>
 <div id="adminProducts"></div>
 </section>
 </main>
+
 <script>
 let products=JSON.parse(localStorage.getItem('yasos_products')||'[]');
 let cart=JSON.parse(localStorage.getItem('yasos_cart')||'[]');
 let orders=JSON.parse(localStorage.getItem('yasos_orders')||'[]');
+
 function save(){
-localStorage.setItem('yasos_products',JSON.stringify(products));
-localStorage.setItem('yasos_cart',JSON.stringify(cart));
-localStorage.setItem('yasos_orders',JSON.stringify(orders));
+ localStorage.setItem('yasos_products',JSON.stringify(products));
+ localStorage.setItem('yasos_cart',JSON.stringify(cart));
+ localStorage.setItem('yasos_orders',JSON.stringify(orders));
 }
+
+function esc(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
+}
+
 function show(id){
-document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
-document.getElementById(id).classList.remove('hidden');
-render();renderCart();renderAdmin();
+ document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ render();
+ renderCart();
+ renderAdmin();
+ window.scrollTo(0,0);
 }
-function function render(){
-  const c = document.getElementById('category').value;
-  const list = products.filter(p => !c || p.category === c);
 
-  document.getElementById('products').innerHTML = list.map(p => `
-    <div class="product" onclick="viewProduct(${p.id})" style="cursor:pointer">
-      ${p.image ? `<img src="${p.image}" alt="">` : ''}
-      <h3>${esc(p.name)}</h3>
-      <p class="price">฿${p.price}</p>
-      <button onclick="event.stopPropagation();addCart(${p.id})">
-        ใส่ตะกร้า
-      </button>
-    </div>
-  `).join('') || '<p>ยังไม่มีสินค้า</p>';
+function render(){
+ const c=document.getElementById('category').value;
+ const list=products.filter(p=>!c||p.category===c);
 
-  document.getElementById('count').textContent =
-    cart.reduce((s,i) => s + i.qty, 0);
+ document.getElementById('products').innerHTML=list.map(p=>`
+ <div class="product" onclick="viewProduct(${p.id})">
+ ${p.image?`<img src="${p.image}" alt="${esc(p.name)}">`:'<div style="aspect-ratio:1;display:grid;place-items:center">ไม่มีรูปสินค้า</div>'}
+ <h3>${esc(p.name)}</h3>
+ <p class="price">฿${p.price}</p>
+ <button onclick="event.stopPropagation();addCart(${p.id})">ใส่ตะกร้า</button>
+ </div>`).join('')||'<p>ยังไม่มีสินค้า กรุณาเพิ่มสินค้าในเมนูจัดการสินค้า</p>';
+
+ document.getElementById('count').textContent=cart.reduce((s,i)=>s+i.qty,0);
 }
 
 function viewProduct(id){
-  const p = products.find(x => x.id === id);
-  if(!p) return;
+ const p=products.find(x=>x.id===id);
+ if(!p)return;
 
-  alert(
-    'สินค้า: ' + p.name +
-    '\nราคา: ฿' + p.price +
-    '\nหมวดหมู่: ' + p.category
-  );
-}{
-let c=document.getElementById('category').value;
-let list=products.filter(p=>!c||p.category===c);
-document.getElementById('products').innerHTML=list.map(p=>`
-<div class="product">
-${p.image?`<img src="${p.image}" alt="">`:''}
-<h3>${esc(p.name)}</h3><p class="price">฿${p.price}</p>
-<button onclick="addCart(${p.id})">ใส่ตะกร้า</button>
-</div>`).join('')||'<p>ยังไม่มีสินค้า กรุณาเพิ่มสินค้าในเมนูจัดการสินค้า</p>';
-document.getElementById('count').textContent=cart.reduce((s,i)=>s+i.qty,0);
+ document.getElementById('detailImage').src=p.image||'';
+ document.getElementById('detailName').textContent=p.name;
+ document.getElementById('detailPrice').textContent='฿'+p.price;
+ document.getElementById('detailCategory').textContent='หมวดหมู่: '+p.category;
+ document.getElementById('detailAdd').onclick=()=>addCart(p.id);
+
+ document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+ document.getElementById('detail').classList.remove('hidden');
+ window.scrollTo(0,0);
 }
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
 function addProduct(){
-let name=document.getElementById('pname').value.trim();
-let price=Number(document.getElementById('pprice').value);
-let category=document.getElementById('pcategory').value;
-let file=document.getElementById('pimage').files[0];
-if(!name||price<0||!Number.isFinite(price)){alert('กรอกชื่อสินค้าและราคา');return}
-function finish(image){
-products.push({id:Date.now(),name,price,category,image});
-save();document.getElementById('pname').value='';
-document.getElementById('pprice').value='';
-document.getElementById('pimage').value='';
-render();renderAdmin();alert('เพิ่มสินค้าแล้ว');
+ const name=document.getElementById('pname').value.trim();
+ const priceInput=document.getElementById('pprice').value;
+ const price=Number(priceInput);
+ const category=document.getElementById('pcategory').value;
+ const file=document.getElementById('pimage').files[0];
+
+ if(!name||priceInput===''||!Number.isFinite(price)||price<0){
+  alert('กรอกชื่อสินค้าและราคาที่ถูกต้อง');
+  return;
+ }
+
+ function finish(image){
+  products.push({id:Date.now(),name,price,category,image});
+  save();
+  document.getElementById('pname').value='';
+  document.getElementById('pprice').value='';
+  document.getElementById('pimage').value='';
+  render();
+  renderAdmin();
+  alert('เพิ่มสินค้าแล้ว');
+ }
+
+ if(file){
+  const reader=new FileReader();
+  reader.onload=e=>finish(e.target.result);
+  reader.readAsDataURL(file);
+ }else finish('');
 }
-if(file){
-let reader=new FileReader();
-reader.onload=e=>finish(e.target.result);
-reader.readAsDataURL(file);
-}else finish('');
-}
+
 function addCart(id){
-let p=products.find(x=>x.id===id);
-if(!p)return;
-let item=cart.find(x=>x.id===id);
-if(item)item.qty++;else cart.push({...p,qty:1});
-save();render();renderCart();alert('เพิ่มลงตะกร้าแล้ว');
+ const p=products.find(x=>x.id===id);
+ if(!p)return;
+ const item=cart.find(x=>x.id===id);
+ if(item)item.qty++;
+ else cart.push({...p,qty:1});
+ save();
+ renderCart();
+ render();
+ alert('เพิ่มลงตะกร้าแล้ว');
 }
+
 function renderCart(){
-document.getElementById('cartItems').innerHTML=cart.map(i=>`
-<div class="panel">${esc(i.name)} × ${i.qty} — ฿${i.price*i.qty}
-<button onclick="removeCart(${i.id})">ลบ</button></div>`).join('')||'<p>ตะกร้าว่าง</p>';
-document.getElementById('total').textContent=cart.reduce((s,i)=>s+i.price*i.qty,0);
-document.getElementById('count').textContent=cart.reduce((s,i)=>s+i.qty,0);
+ document.getElementById('cartItems').innerHTML=cart.map(i=>`
+ <div class="panel">
+ ${esc(i.name)} × ${i.qty} — ฿${i.price*i.qty}
+ <button onclick="removeCart(${i.id})">ลบ</button>
+ </div>`).join('')||'<p>ตะกร้าว่าง</p>';
+
+ document.getElementById('total').textContent=
+ cart.reduce((s,i)=>s+i.price*i.qty,0);
+ document.getElementById('count').textContent=
+ cart.reduce((s,i)=>s+i.qty,0);
 }
-function removeCart(id){cart=cart.filter(i=>i.id!==id);save();renderCart();render()}
+
+function removeCart(id){
+ cart=cart.filter(i=>i.id!==id);
+ save();
+ renderCart();
+ render();
+}
+
 function checkout(){
-let buyer=document.getElementById('buyer').value.trim();
-let phone=document.getElementById('phone').value.trim();
-let address=document.getElementById('address').value.trim();
-if(!cart.length)return alert('ตะกร้าว่าง');
-if(!buyer||!phone||!address)return alert('กรอกข้อมูลจัดส่งให้ครบ');
-let order={id:'YS'+Date.now(),buyer,phone,address,items:[...cart],total:cart.reduce((s,i)=>s+i.price*i.qty,0),status:'รอชำระเงิน'};
-orders.push(order);cart=[];save();renderCart();
-document.getElementById('orderId').value=order.id;
-alert('สร้างคำสั่งซื้อแล้ว เลขคำสั่งซื้อ '+order.id);
-show('orders');
+ const buyer=document.getElementById('buyer').value.trim();
+ const phone=document.getElementById('phone').value.trim();
+ const address=document.getElementById('address').value.trim();
+
+ if(!cart.length)return alert('ตะกร้าว่าง');
+ if(!buyer||!phone||!address)return alert('กรอกข้อมูลจัดส่งให้ครบ');
+
+ const order={
+  id:'YS'+Date.now(),buyer,phone,address,
+  items:[...cart],
+  total:cart.reduce((s,i)=>s+i.price*i.qty,0),
+  status:'รอชำระเงิน'
+ };
+
+ orders.push(order);
+ cart=[];
+ save();
+ document.getElementById('orderId').value=order.id;
+ alert('สร้างคำสั่งซื้อแล้ว เลขคำสั่งซื้อ '+order.id);
+ show('orders');
 }
+
 function submitPayment(){
-let id=document.getElementById('orderId').value.trim();
-let file=document.getElementById('slip').files[0];
-let order=orders.find(o=>o.id===id);
-if(!order)return alert('ไม่พบคำสั่งซื้อ');
-if(!file)return alert('กรุณาเลือกรูปสลิป');
-order.status='แนบสลิปแล้ว (รอตรวจสอบ)';
-order.slipName=file.name;save();
-document.getElementById('paymentMessage').textContent='บันทึกสถานะแล้ว กรุณาส่งสลิปให้ร้านตรวจสอบด้วย';
+ const id=document.getElementById('orderId').value.trim();
+ const file=document.getElementById('slip').files[0];
+ const order=orders.find(o=>o.id===id);
+
+ if(!order)return alert('ไม่พบคำสั่งซื้อ');
+ if(!file)return alert('กรุณาเลือกรูปสลิป');
+
+ order.status='แนบสลิปแล้ว (รอตรวจสอบ)';
+ order.slipName=file.name;
+ save();
+
+ document.getElementById('paymentMessage').textContent=
+ 'บันทึกสถานะในอุปกรณ์นี้แล้ว กรุณาส่งสลิปให้ร้านตรวจสอบด้วย';
 }
+
 function renderAdmin(){
-let el=document.getElementById('adminProducts');
-if(!el)return;
-el.innerHTML='<h3>รายการสินค้า</h3>'+products.map(p=>`
-<div class="panel">${esc(p.name)} — ฿${p.price}
-<button onclick="deleteProduct(${p.id})">ลบสินค้า</button></div>`).join('')||'<p>ยังไม่มีสินค้า</p>';
-el.innerHTML+='<h3>คำสั่งซื้อ</h3>'+orders.map(o=>`
-<div class="panel">#${o.id}<br>${esc(o.buyer)} — ฿${o.total}<br>${esc(o.status)}</div>`).join('');
+ const el=document.getElementById('adminProducts');
+ if(!el)return;
+
+ el.innerHTML='<h3>รายการสินค้า</h3>'+
+ products.map(p=>`
+ <div class="panel">${esc(p.name)} — ฿${p.price}
+ <button onclick="deleteProduct(${p.id})">ลบสินค้า</button>
+ </div>`).join('')||'<p>ยังไม่มีสินค้า</p>';
+
+ el.innerHTML+='<h3>คำสั่งซื้อ</h3>'+
+ orders.map(o=>`
+ <div class="panel">#${o.id}<br>
+ ${esc(o.buyer)} — ฿${o.total}<br>${esc(o.status)}</div>
+ `).join('');
 }
+
 function deleteProduct(id){
-if(!confirm('ลบสินค้านี้?'))return;
-products=products.filter(p=>p.id!==id);save();render();renderAdmin();
+ if(!confirm('ลบสินค้านี้?'))return;
+ products=products.filter(p=>p.id!==id);
+ save();
+ render();
+ renderAdmin();
 }
-render();renderCart();renderAdmin();
+
+render();
+renderCart();
+renderAdmin();
 </script>
 </body>
 </html>
