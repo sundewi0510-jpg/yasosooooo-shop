@@ -7,16 +7,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body{font-family:Arial;background:#fff8fb;padding:16px;color:#333}
-main{max-width:650px;margin:auto}
+main{max-width:700px;margin:auto}
 section{background:white;padding:16px;border-radius:12px;margin:12px 0}
 input,textarea{box-sizing:border-box;width:100%;padding:12px;margin:6px 0}
-button{padding:12px;margin:5px;background:#e98bb8;color:white;border:0;border-radius:8px}
-.product{border-top:1px solid #ddd;padding:12px 0}
+button{padding:10px 14px;margin:4px;background:#e98bb8;color:white;border:0;border-radius:8px}
+.secondary{background:#888}
+.item{border-top:1px solid #ddd;padding:12px 0}
+.small{font-size:13px;color:#777}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <main>
 <h2>💗 yasosooooo Admin</h2>
+
 <section id="login">
 <h3>เข้าสู่ระบบ</h3>
 <input id="email" type="email" placeholder="อีเมลแอดมิน">
@@ -24,35 +28,72 @@ button{padding:12px;margin:5px;background:#e98bb8;color:white;border:0;border-ra
 <button id="loginBtn">เข้าสู่ระบบ</button>
 <p id="loginMsg"></p>
 </section>
+
 <section id="panel" hidden>
 <button id="logoutBtn">ออกจากระบบ</button>
-<h3>เพิ่ม / แก้ไขสินค้า</h3>
+
+<h3>สินค้า</h3>
 <form id="productForm">
 <input id="productId" type="hidden">
 <input id="name" placeholder="ชื่อสินค้า" required>
-<textarea id="description" placeholder="รายละเอียด"></textarea>
+<textarea id="description" placeholder="รายละเอียดสินค้า"></textarea>
 <input id="image_url" type="url" placeholder="ลิงก์รูปสินค้า">
-<input id="price" type="number" min="0" step="0.01" placeholder="ราคา" required>
-<input id="stock" type="number" min="0" placeholder="จำนวน" required>
-<label><input id="active" type="checkbox" checked> แสดงบนหน้าร้าน</label>
-<br><button type="submit">บันทึกสินค้า</button>
-<button type="button" id="clearBtn">ล้างแบบฟอร์ม</button>
+<input id="price" type="number" min="0" step="0.01"
+ placeholder="ราคาเริ่มต้น" required>
+<input id="stock" type="number" min="0"
+ placeholder="สต็อกหลัก" required>
+<label><input id="active" type="checkbox" checked>
+แสดงบนหน้าร้าน</label><br>
+<button type="submit">บันทึกสินค้า</button>
+<button type="button" class="secondary" id="clearProduct">
+ล้างฟอร์ม
+</button>
 </form>
-<p id="msg"></p>
+<p id="productMsg"></p>
+
 <h3>รายการสินค้า</h3>
 <div id="products"></div>
+
+<section id="variantSection" hidden>
+<h3>ตัวเลือกของสินค้า</h3>
+<p id="selectedProduct"></p>
+<p class="small">
+เพิ่มแต่ละแบบแยกกัน เช่น ลาย A ราคา 39 บาท สต็อก 5 ชิ้น
+</p>
+
+<form id="variantForm">
+<input id="variantId" type="hidden">
+<input id="variantName" placeholder="ชื่อแบบ เช่น ลาย A" required>
+<input id="variantPrice" type="number" min="0" step="0.01"
+ placeholder="ราคาของแบบนี้" required>
+<input id="variantStock" type="number" min="0"
+ placeholder="สต็อกของแบบนี้" required>
+<label><input id="variantActive" type="checkbox" checked>
+เปิดขายแบบนี้</label><br>
+<button type="submit">บันทึกตัวเลือก</button>
+<button type="button" class="secondary" id="clearVariant">
+ล้างฟอร์มตัวเลือก
+</button>
+</form>
+<p id="variantMsg"></p>
+<div id="variants"></div>
+</section>
 </section>
 </main>
-<script>
-const SUPABASE_URL = 'https://ybjtekjaucpzddjuplsj.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_RMiwcgxdgIm-aiReJGIaJg_y6HCe_bD';
-const db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $ = id => document.getElementById(id);
 
-$('loginBtn').onclick = async () => {
+<script>
+const SUPABASE_URL='https://ybjtekjaucpzddjuplsj.supabase.co';
+const SUPABASE_KEY='sb_publishable_RMiwcgxdgIm-aiReJGIaJg_y6HCe_bD';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let selectedProductId=null;
+let selectedProductName='';
+
+$('loginBtn').onclick=async()=>{
  $('loginMsg').textContent='กำลังเข้าสู่ระบบ...';
  const {error}=await db.auth.signInWithPassword({
-  email:$('email').value.trim(),password:$('password').value
+  email:$('email').value.trim(),
+  password:$('password').value
  });
  if(error){$('loginMsg').textContent=error.message;return;}
  await checkSession();
@@ -64,56 +105,36 @@ $('logoutBtn').onclick=async()=>{
  $('login').hidden=false;
 };
 
-$('clearBtn').onclick=()=>{$('productForm').reset();$('productId').value='';};
-
 async function checkSession(){
  const {data:{session}}=await db.auth.getSession();
- if(!session){$('panel').hidden=true;$('login').hidden=false;return;}
+ if(!session){
+  $('panel').hidden=true;
+  $('login').hidden=false;
+  return;
+ }
  const {data:admin,error}=await db.from('admin_users')
   .select('user_id').eq('user_id',session.user.id).maybeSingle();
  if(error||!admin){
   $('loginMsg').textContent='บัญชีนี้ไม่มีสิทธิ์แอดมิน';
-  await db.auth.signOut();return;
+  await db.auth.signOut();
+  return;
  }
- $('login').hidden=true;$('panel').hidden=false;
+ $('login').hidden=true;
+ $('panel').hidden=false;
  await loadProducts();
 }
 
-async function loadProducts(){
- $('products').textContent='กำลังโหลด...';
- const {data,error}=await db.from('products')
-  .select('id,name,description,image_url,price,stock,active')
-  .order('id',{ascending:false});
- if(error){$('products').textContent=error.message;return;}
- $('products').replaceChildren();
- if(!data.length){$('products').textContent='ยังไม่มีสินค้า';return;}
- data.forEach(p=>{
-  const box=document.createElement('div');box.className='product';
-  const title=document.createElement('b');title.textContent=p.name;
-  const info=document.createElement('p');
-  info.textContent='ราคา '+p.price+' บาท | คงเหลือ '+p.stock+
-   ' | '+(p.active?'แสดงหน้าร้าน':'ซ่อน');
-  const edit=document.createElement('button');edit.textContent='แก้ไข';
-  edit.onclick=()=>{
-   $('productId').value=p.id;$('name').value=p.name||'';
-   $('description').value=p.description||'';
-   $('image_url').value=p.image_url||'';
-   $('price').value=p.price;$('stock').value=p.stock;
-   $('active').checked=p.active;
-   window.scrollTo(0,0);
-  };
-  const del=document.createElement('button');del.textContent='ลบ';
-  del.onclick=async()=>{
-   if(!confirm('ยืนยันลบ '+p.name+' ?'))return;
-   const {error}=await db.from('products').delete().eq('id',p.id);
-   if(error)alert(error.message);else await loadProducts();
-  };
-  box.append(title,info,edit,del);$('products').append(box);
- });
+function clearProduct(){
+ $('productForm').reset();
+ $('productId').value='';
+ $('active').checked=true;
+ $('productMsg').textContent='';
 }
+$('clearProduct').onclick=clearProduct;
 
 $('productForm').onsubmit=async e=>{
- e.preventDefault();$('msg').textContent='กำลังบันทึก...';
+ e.preventDefault();
+ $('productMsg').textContent='กำลังบันทึก...';
  const item={
   name:$('name').value.trim(),
   description:$('description').value.trim(),
@@ -123,13 +144,164 @@ $('productForm').onsubmit=async e=>{
   active:$('active').checked
  };
  const id=$('productId').value;
- const {error}=id
+ const result=id
   ?await db.from('products').update(item).eq('id',id)
   :await db.from('products').insert(item);
- if(error){$('msg').textContent='บันทึกไม่สำเร็จ: '+error.message;return;}
- $('msg').textContent='บันทึกสำเร็จ';
- $('productForm').reset();$('productId').value='';
- $('active').checked=true;await loadProducts();
+ if(result.error){
+  $('productMsg').textContent='บันทึกไม่สำเร็จ: '+result.error.message;
+  return;
+ }
+ $('productMsg').textContent='บันทึกสินค้าสำเร็จ';
+ clearProduct();
+ await loadProducts();
+};
+
+async function loadProducts(){
+ $('products').textContent='กำลังโหลด...';
+ const {data,error}=await db.from('products')
+  .select('id,name,description,image_url,price,stock,active')
+  .order('id',{ascending:false});
+ if(error){
+  $('products').textContent=error.message;
+  return;
+ }
+ $('products').replaceChildren();
+ if(!data.length){
+  $('products').textContent='ยังไม่มีสินค้า';
+  return;
+ }
+ data.forEach(p=>{
+  const box=document.createElement('div');
+  box.className='item';
+  const title=document.createElement('b');
+  title.textContent=p.name;
+  const info=document.createElement('p');
+  info.textContent='ราคาเริ่มต้น '+p.price+' บาท | สต็อกหลัก '
+   +p.stock+' | '+(p.active?'เปิดขาย':'ซ่อน');
+  const edit=document.createElement('button');
+  edit.textContent='แก้ไขสินค้า';
+  edit.onclick=()=>{
+   $('productId').value=p.id;
+   $('name').value=p.name||'';
+   $('description').value=p.description||'';
+   $('image_url').value=p.image_url||'';
+   $('price').value=p.price;
+   $('stock').value=p.stock;
+   $('active').checked=p.active;
+   window.scrollTo(0,0);
+  };
+  const manage=document.createElement('button');
+  manage.textContent='จัดการตัวเลือก';
+  manage.onclick=()=>openVariants(p.id,p.name);
+  const del=document.createElement('button');
+  del.textContent='ลบสินค้า';
+  del.className='secondary';
+  del.onclick=async()=>{
+   if(!confirm('ยืนยันลบสินค้า '+p.name+' ?'))return;
+   const {error}=await db.from('products').delete().eq('id',p.id);
+   if(error){alert('ลบไม่สำเร็จ: '+error.message);return;}
+   if(String(selectedProductId)===String(p.id)){
+    $('variantSection').hidden=true;
+   }
+   await loadProducts();
+  };
+  box.append(title,info,edit,manage,del);
+  $('products').append(box);
+ });
+}
+
+async function openVariants(id,name){
+ selectedProductId=id;
+ selectedProductName=name;
+ $('selectedProduct').textContent='สินค้า: '+name;
+ $('variantSection').hidden=false;
+ clearVariant();
+ await loadVariants();
+ $('variantSection').scrollIntoView({behavior:'smooth'});
+}
+
+function clearVariant(){
+ $('variantForm').reset();
+ $('variantId').value='';
+ $('variantActive').checked=true;
+ $('variantMsg').textContent='';
+}
+$('clearVariant').onclick=clearVariant;
+
+async function loadVariants(){
+ $('variants').textContent='กำลังโหลด...';
+ const {data,error}=await db.from('product_variants')
+  .select('id,product_id,name,price,stock,active')
+  .eq('product_id',selectedProductId)
+  .order('id');
+ if(error){
+  $('variants').textContent='โหลดตัวเลือกไม่สำเร็จ: '+error.message;
+  return;
+ }
+ $('variants').replaceChildren();
+ if(!data.length){
+  $('variants').textContent='ยังไม่มีตัวเลือกสำหรับสินค้านี้';
+  return;
+ }
+ data.forEach(v=>{
+  const box=document.createElement('div');
+  box.className='item';
+  const title=document.createElement('b');
+  title.textContent=v.name;
+  const info=document.createElement('p');
+  info.textContent='ราคา '+v.price+' บาท | คงเหลือ '+v.stock
+   +' | '+(v.active?'เปิดขาย':'ปิดขาย');
+  const edit=document.createElement('button');
+  edit.textContent='แก้ไข';
+  edit.onclick=()=>{
+   $('variantId').value=v.id;
+   $('variantName').value=v.name;
+   $('variantPrice').value=v.price;
+   $('variantStock').value=v.stock;
+   $('variantActive').checked=v.active;
+   $('variantMsg').textContent='กำลังแก้ไข: '+v.name;
+   $('variantForm').scrollIntoView({behavior:'smooth'});
+  };
+  const del=document.createElement('button');
+  del.textContent='ลบตัวเลือก';
+  del.className='secondary';
+  del.onclick=async()=>{
+   if(!confirm('ยืนยันลบตัวเลือก '+v.name+' ?'))return;
+   const {error}=await db.from('product_variants')
+    .delete().eq('id',v.id);
+   if(error){alert('ลบไม่สำเร็จ: '+error.message);return;}
+   await loadVariants();
+  };
+  box.append(title,info,edit,del);
+  $('variants').append(box);
+ });
+}
+
+$('variantForm').onsubmit=async e=>{
+ e.preventDefault();
+ if(selectedProductId===null){
+  $('variantMsg').textContent='กรุณาเลือกสินค้าก่อน';
+  return;
+ }
+ $('variantMsg').textContent='กำลังบันทึกตัวเลือก...';
+ const item={
+  product_id:selectedProductId,
+  name:$('variantName').value.trim(),
+  price:Number($('variantPrice').value),
+  stock:Number($('variantStock').value),
+  active:$('variantActive').checked
+ };
+ const id=$('variantId').value;
+ const result=id
+  ?await db.from('product_variants').update(item).eq('id',id)
+  :await db.from('product_variants').insert(item);
+ if(result.error){
+  $('variantMsg').textContent='บันทึกไม่สำเร็จ: '+result.error.message;
+  return;
+ }
+ $('variantMsg').textContent='บันทึกตัวเลือกสำเร็จ';
+ clearVariant();
+ await loadVariants();
 };
 
 checkSession();
