@@ -1,248 +1,177 @@
-
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>yasosooooo | ร้านการ์ดและของสะสม</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fff9fc;
-      color: #493744;
-    }
-    header {
-      padding: 24px 16px;
-      text-align: center;
-      background: #ffe5f0;
-    }
-    h1 { margin: 0 0 8px; color: #bd6393; }
-    main { max-width: 1000px; margin: auto; padding: 20px 14px; }
-    #status { text-align: center; padding: 20px; }
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-      gap: 14px;
-    }
-    .product {
-      background: white;
-      border: 1px solid #f3dce8;
-      border-radius: 14px;
-      padding: 12px;
-      overflow: hidden;
-    }
-    .product img, .no-image {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #fff1f7;
-    }
-    .no-image {
-      display: grid;
-      place-items: center;
-      color: #bd6393;
-    }
-    .product h3 { font-size: 16px; margin: 10px 0 6px; }
-    .description { font-size: 13px; color: #806c7a; white-space: pre-wrap; }
-    .price { font-weight: bold; color: #c0528a; margin: 8px 0; font-size: 18px; }
-    .stock { font-size: 12px; color: #776b73; margin: 7px 0; }
-    .option-label { display: block; font-size: 13px; margin-top: 12px; }
-    .variant-select {
-      width: 100%;
-      margin-top: 5px;
-      padding: 10px 8px;
-      border: 1px solid #e8bfd2;
-      border-radius: 8px;
-      background: white;
-      color: #493744;
-      font-size: 14px;
-    }
-    .sold-out { color: #c0528a; font-weight: bold; }
-    footer { text-align: center; padding: 25px; color: #9a8190; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>yasosooooo | ร้านการ์ดและของสะสม</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#fffafd;color:#493b48}
+header{background:#f8e5f0;text-align:center;padding:24px 12px}
+header h1{margin:0;color:#b45d91}
+nav{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:14px}
+main{max-width:1000px;margin:auto;padding:16px}
+button{padding:10px 14px;border:0;border-radius:9px;background:#eac9df;color:#493b48;cursor:pointer}
+input,select,textarea{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #e3cddd;border-radius:8px;font:inherit}
+#products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product,.panel{background:white;border:1px solid #f0dce9;border-radius:14px;padding:12px}
+.product img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff8fc;border-radius:9px}
+.price{color:#b45d91;font-weight:bold}
+.hidden{display:none!important}
+@media(min-width:650px){#products{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>yasosooooo</h1>
-    <div>ร้านการ์ดและของสะสมแฟนด้อม ♡</div>
-  </header>
-
-  <main>
-    <h2>สินค้าของเรา</h2>
-    <div id="status">กำลังโหลดสินค้า...</div>
-    <div class="products" id="products"></div>
-  </main>
-
-  <footer>yasosooooo ♡</footer>
-
-  <script>
-    const SUPABASE_URL = 'https://ybjtekjaucpzddjuplsj.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_RMiwcgxdgIm-aiReJGIaJg_y6HCe_bD';
-
-    const client = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
-
-    const statusBox = document.getElementById('status');
-    const productsBox = document.getElementById('products');
-
-    function money(value) {
-      return '฿' + Number(value || 0).toLocaleString('th-TH');
-    }
-
-    async function loadProducts() {
-      try {
-        const { data: products, error } = await client
-          .from('products')
-          .select('id, name, description, image_url, price, stock')
-          .eq('active', true)
-          .order('id', { ascending: false });
-
-        if (error) throw error;
-
-        productsBox.replaceChildren();
-
-        if (!products || products.length === 0) {
-          statusBox.textContent = 'ยังไม่มีสินค้าเปิดขาย';
-          return;
-        }
-
-        // โหลดตัวเลือกของสินค้าทั้งหมด
-        const { data: variants, error: variantError } = await client
-          .from('product_variants')
-          .select('id, product_id, name, price, stock')
-          .eq('active', true)
-          .order('id', { ascending: true });
-
-        if (variantError) throw variantError;
-
-        statusBox.textContent = '';
-
-        products.forEach(product => {
-          const card = document.createElement('article');
-          card.className = 'product';
-
-          if (product.image_url) {
-            const img = document.createElement('img');
-            img.src = product.image_url;
-            img.alt = product.name || 'สินค้า';
-            img.loading = 'lazy';
-            img.onerror = () => {
-              const placeholder = document.createElement('div');
-              placeholder.className = 'no-image';
-              placeholder.textContent = '♡ โหลดรูปไม่ได้ ♡';
-              img.replaceWith(placeholder);
-            };
-            card.appendChild(img);
-          } else {
-            const placeholder = document.createElement('div');
-            placeholder.className = 'no-image';
-            placeholder.textContent = '♡ ไม่มีรูปสินค้า ♡';
-            card.appendChild(placeholder);
-          }
-
-          const name = document.createElement('h3');
-          name.textContent = product.name || 'สินค้า';
-          card.appendChild(name);
-
-          if (product.description) {
-            const desc = document.createElement('div');
-            desc.className = 'description';
-            desc.textContent = product.description;
-            card.appendChild(desc);
-          }
-
-          const productVariants = (variants || []).filter(
-            v => String(v.product_id) === String(product.id)
-          );
-
-          const price = document.createElement('div');
-          price.className = 'price';
-
-          const stock = document.createElement('div');
-          stock.className = 'stock';
-
-          function updateDisplay(item) {
-            const currentPrice = item ? item.price : product.price;
-            const currentStock = item ? item.stock : product.stock;
-
-            price.textContent = money(currentPrice);
-
-            if (Number(currentStock) > 0) {
-              stock.textContent = 'คงเหลือ ' +
-                Number(currentStock).toLocaleString('th-TH') + ' ชิ้น';
-              stock.classList.remove('sold-out');
-            } else {
-              stock.textContent = 'สินค้าหมด';
-              stock.classList.add('sold-out');
-            }
-          }
-
-          if (productVariants.length > 0) {
-            const label = document.createElement('label');
-            label.className = 'option-label';
-            label.textContent = 'เลือกรูปแบบสินค้า';
-
-            const select = document.createElement('select');
-            select.className = 'variant-select';
-
-            productVariants.forEach((variant, index) => {
-              const option = document.createElement('option');
-              option.value = String(variant.id);
-              option.textContent = variant.name + ' — ' +
-                money(variant.price) + ' (เหลือ ' +
-                Number(variant.stock) + ')';
-              option.disabled = Number(variant.stock) <= 0;
-
-              if (index === 0) select.value = String(variant.id);
-              select.appendChild(option);
-            });
-
-            // เลือกแบบแรกที่ยังมีสินค้า ถ้ามี
-            const availableVariant = productVariants.find(
-              v => Number(v.stock) > 0
-            );
-
-            if (availableVariant) {
-              select.value = String(availableVariant.id);
-            }
-
-            select.addEventListener('change', () => {
-              const chosen = productVariants.find(
-                v => String(v.id) === select.value
-              );
-              if (chosen) updateDisplay(chosen);
-            });
-
-            label.appendChild(select);
-            card.appendChild(label);
-
-            const initialVariant = productVariants.find(
-              v => String(v.id) === select.value
-            ) || productVariants[0];
-
-            updateDisplay(initialVariant);
-          } else {
-            updateDisplay(null);
-          }
-
-          card.appendChild(price);
-          card.appendChild(stock);
-          productsBox.appendChild(card);
-        });
-      } catch (error) {
-        console.error(error);
-        statusBox.textContent =
-          'โหลดสินค้าไม่สำเร็จ: ' + (error.message || String(error));
-      }
-    }
-
-    loadProducts();
-  </script>
+<header>
+<h1>yasosooooo</h1>
+<p>ร้านการ์ดและของสะสมแฟนด้อม ♡</p>
+</header>
+<nav>
+<button onclick="show('shop')">หน้าร้าน</button>
+<button onclick="show('cart')">ตะกร้า (<span id="count">0</span>)</button>
+<button onclick="show('orders')">แจ้งชำระเงิน</button>
+<button onclick="show('admin')">จัดการสินค้า</button>
+</nav>
+<main>
+<section id="shop">
+<h2>สินค้า</h2>
+<select id="category" onchange="render()">
+<option value="">ทุกหมวดหมู่</option>
+<option>การ์ด</option><option>โฟโต้การ์ด</option><option>ของสะสม</option>
+</select>
+<div id="products"></div>
+</section>
+<section id="cart" class="hidden">
+<h2>ตะกร้าสินค้า</h2><div id="cartItems"></div>
+<p>ยอดรวม ฿<span id="total">0</span></p>
+<div class="panel">
+<input id="buyer" placeholder="ชื่อผู้รับ">
+<input id="phone" placeholder="เบอร์โทรศัพท์">
+<textarea id="address" placeholder="ที่อยู่จัดส่ง"></textarea>
+<button onclick="checkout()">ยืนยันคำสั่งซื้อ</button>
+</div>
+</section>
+<section id="orders" class="hidden">
+<h2>แจ้งชำระเงิน</h2>
+<div class="panel">
+<p>ธนาคาร KBANK (กสิกรไทย)</p>
+<p>ชื่อบัญชี NARINPORN KANDEE</p>
+<p>กรุณาตรวจสอบเลขบัญชีจากทางร้านก่อนโอนเงิน</p>
+<input id="orderId" placeholder="เลขคำสั่งซื้อ">
+<input id="slip" type="file" accept="image/*">
+<button onclick="submitPayment()">ส่งหลักฐาน</button>
+<p id="paymentMessage"></p>
+</div>
+</section>
+<section id="admin" class="hidden">
+<h2>จัดการสินค้า</h2>
+<div class="panel">
+<input id="pname" placeholder="ชื่อสินค้า">
+<input id="pprice" type="number" min="0" placeholder="ราคา">
+<select id="pcategory"><option>การ์ด</option><option>โฟโต้การ์ด</option><option>ของสะสม</option></select>
+<input id="pimage" type="file" accept="image/*">
+<button onclick="addProduct()">เพิ่มสินค้า</button>
+</div>
+<div id="adminProducts"></div>
+</section>
+</main>
+<script>
+let products=JSON.parse(localStorage.getItem('yasos_products')||'[]');
+let cart=JSON.parse(localStorage.getItem('yasos_cart')||'[]');
+let orders=JSON.parse(localStorage.getItem('yasos_orders')||'[]');
+function save(){
+localStorage.setItem('yasos_products',JSON.stringify(products));
+localStorage.setItem('yasos_cart',JSON.stringify(cart));
+localStorage.setItem('yasos_orders',JSON.stringify(orders));
+}
+function show(id){
+document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+render();renderCart();renderAdmin();
+}
+function render(){
+let c=document.getElementById('category').value;
+let list=products.filter(p=>!c||p.category===c);
+document.getElementById('products').innerHTML=list.map(p=>`
+<div class="product">
+${p.image?`<img src="${p.image}" alt="">`:''}
+<h3>${esc(p.name)}</h3><p class="price">฿${p.price}</p>
+<button onclick="addCart(${p.id})">ใส่ตะกร้า</button>
+</div>`).join('')||'<p>ยังไม่มีสินค้า กรุณาเพิ่มสินค้าในเมนูจัดการสินค้า</p>';
+document.getElementById('count').textContent=cart.reduce((s,i)=>s+i.qty,0);
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addProduct(){
+let name=document.getElementById('pname').value.trim();
+let price=Number(document.getElementById('pprice').value);
+let category=document.getElementById('pcategory').value;
+let file=document.getElementById('pimage').files[0];
+if(!name||price<0||!Number.isFinite(price)){alert('กรอกชื่อสินค้าและราคา');return}
+function finish(image){
+products.push({id:Date.now(),name,price,category,image});
+save();document.getElementById('pname').value='';
+document.getElementById('pprice').value='';
+document.getElementById('pimage').value='';
+render();renderAdmin();alert('เพิ่มสินค้าแล้ว');
+}
+if(file){
+let reader=new FileReader();
+reader.onload=e=>finish(e.target.result);
+reader.readAsDataURL(file);
+}else finish('');
+}
+function addCart(id){
+let p=products.find(x=>x.id===id);
+if(!p)return;
+let item=cart.find(x=>x.id===id);
+if(item)item.qty++;else cart.push({...p,qty:1});
+save();render();renderCart();alert('เพิ่มลงตะกร้าแล้ว');
+}
+function renderCart(){
+document.getElementById('cartItems').innerHTML=cart.map(i=>`
+<div class="panel">${esc(i.name)} × ${i.qty} — ฿${i.price*i.qty}
+<button onclick="removeCart(${i.id})">ลบ</button></div>`).join('')||'<p>ตะกร้าว่าง</p>';
+document.getElementById('total').textContent=cart.reduce((s,i)=>s+i.price*i.qty,0);
+document.getElementById('count').textContent=cart.reduce((s,i)=>s+i.qty,0);
+}
+function removeCart(id){cart=cart.filter(i=>i.id!==id);save();renderCart();render()}
+function checkout(){
+let buyer=document.getElementById('buyer').value.trim();
+let phone=document.getElementById('phone').value.trim();
+let address=document.getElementById('address').value.trim();
+if(!cart.length)return alert('ตะกร้าว่าง');
+if(!buyer||!phone||!address)return alert('กรอกข้อมูลจัดส่งให้ครบ');
+let order={id:'YS'+Date.now(),buyer,phone,address,items:[...cart],total:cart.reduce((s,i)=>s+i.price*i.qty,0),status:'รอชำระเงิน'};
+orders.push(order);cart=[];save();renderCart();
+document.getElementById('orderId').value=order.id;
+alert('สร้างคำสั่งซื้อแล้ว เลขคำสั่งซื้อ '+order.id);
+show('orders');
+}
+function submitPayment(){
+let id=document.getElementById('orderId').value.trim();
+let file=document.getElementById('slip').files[0];
+let order=orders.find(o=>o.id===id);
+if(!order)return alert('ไม่พบคำสั่งซื้อ');
+if(!file)return alert('กรุณาเลือกรูปสลิป');
+order.status='แนบสลิปแล้ว (รอตรวจสอบ)';
+order.slipName=file.name;save();
+document.getElementById('paymentMessage').textContent='บันทึกสถานะแล้ว กรุณาส่งสลิปให้ร้านตรวจสอบด้วย';
+}
+function renderAdmin(){
+let el=document.getElementById('adminProducts');
+if(!el)return;
+el.innerHTML='<h3>รายการสินค้า</h3>'+products.map(p=>`
+<div class="panel">${esc(p.name)} — ฿${p.price}
+<button onclick="deleteProduct(${p.id})">ลบสินค้า</button></div>`).join('')||'<p>ยังไม่มีสินค้า</p>';
+el.innerHTML+='<h3>คำสั่งซื้อ</h3>'+orders.map(o=>`
+<div class="panel">#${o.id}<br>${esc(o.buyer)} — ฿${o.total}<br>${esc(o.status)}</div>`).join('');
+}
+function deleteProduct(id){
+if(!confirm('ลบสินค้านี้?'))return;
+products=products.filter(p=>p.id!==id);save();render();renderAdmin();
+}
+render();renderCart();renderAdmin();
+</script>
 </body>
 </html>
