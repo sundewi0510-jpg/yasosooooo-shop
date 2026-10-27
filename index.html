@@ -151,7 +151,7 @@
       } catch (error) {
         console.error(error);
         statusBox.textContent =
-          'โหลดสินค้าไม่สำเร็จ กรุณาตรวจสอบการตั้งค่า Supabase และสิทธิ์การอ่านข้อมูล';
+  'โหลดสินค้าไม่สำเร็จ: ' + (error.message || String(error));
       }
     }
 
