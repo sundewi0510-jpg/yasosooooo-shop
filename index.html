@@ -90,7 +90,35 @@ document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
 document.getElementById(id).classList.remove('hidden');
 render();renderCart();renderAdmin();
 }
-function render(){
+function function render(){
+  const c = document.getElementById('category').value;
+  const list = products.filter(p => !c || p.category === c);
+
+  document.getElementById('products').innerHTML = list.map(p => `
+    <div class="product" onclick="viewProduct(${p.id})" style="cursor:pointer">
+      ${p.image ? `<img src="${p.image}" alt="">` : ''}
+      <h3>${esc(p.name)}</h3>
+      <p class="price">฿${p.price}</p>
+      <button onclick="event.stopPropagation();addCart(${p.id})">
+        ใส่ตะกร้า
+      </button>
+    </div>
+  `).join('') || '<p>ยังไม่มีสินค้า</p>';
+
+  document.getElementById('count').textContent =
+    cart.reduce((s,i) => s + i.qty, 0);
+}
+
+function viewProduct(id){
+  const p = products.find(x => x.id === id);
+  if(!p) return;
+
+  alert(
+    'สินค้า: ' + p.name +
+    '\nราคา: ฿' + p.price +
+    '\nหมวดหมู่: ' + p.category
+  );
+}{
 let c=document.getElementById('category').value;
 let list=products.filter(p=>!c||p.category===c);
 document.getElementById('products').innerHTML=list.map(p=>`
