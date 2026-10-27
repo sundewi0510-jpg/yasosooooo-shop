@@ -1,17 +1,161 @@
+
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff7fb"><title>yasosooooo | Fan Goods Shop</title>
-<style>
-:root{--pink:#f4b7d0;--blue:#e7f3ff;--ink:#342b33;--muted:#766a73;--line:#f0dce6}*{box-sizing:border-box}body{margin:0;background:#fff8fb;color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 14px;background:var(--pink);color:#53263b;font-weight:750}.secondary{background:white;border:1px solid var(--line)}.wrap{max-width:1000px;margin:auto;padding:0 16px}.top{background:white;border-bottom:1px solid var(--line);position:sticky;top:0}.nav{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:68px}.brand{font-size:23px;font-weight:900;color:#9b4268}.brand small{display:block;font-size:10px;color:var(--muted);letter-spacing:1.5px}.nav button{margin-left:4px}.hero{margin:24px 0;padding:26px;border-radius:22px;background:linear-gradient(120deg,#fff0f7,#edf7ff);display:flex;justify-content:space-between;align-items:center;gap:12px}.hero h1{font-size:clamp(25px,5vw,36px);margin:0 0 8px}.hero p{line-height:1.7;color:#766a73;margin:0}.hero-art{font-size:56px}.note{background:#fff2c9;border-bottom:1px solid #f2df9e;border-radius:12px;padding:12px;font-size:12px;line-height:1.6}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}.card,.panel{background:white;border:1px solid var(--line);border-radius:18px;overflow:hidden}.art{height:145px;display:grid;place-items:center;background:linear-gradient(135deg,#fff0f7,#eaf5ff);font-size:54px}.body{padding:14px}.body h3{margin:0 0 4px}.muted,.small{color:var(--muted);font-size:12px;line-height:1.6}.price{font-size:18px;font-weight:850}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.panel{display:none;padding:18px;margin:20px 0}.panel.active{display:block}.panel h2{margin:0 0 12px}.field{display:flex;flex-direction:column;gap:5px;margin:10px 0}.field label{font-size:13px;font-weight:700}.field input,.field textarea,.field select{width:100%;padding:11px;border:1px solid #e8dbe5;border-radius:10px;background:white}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.full{grid-column:1/-1}.summary{background:#fff7fb;border:1px solid var(--line);border-radius:13px;padding:13px;margin:12px 0}.line{padding:8px 0;border-bottom:1px solid var(--line)}.footer{text-align:center;color:var(--muted);font-size:12px;padding:25px 0}.status{background:#fff0c9;padding:5px 9px;border-radius:99px;font-size:12px;font-weight:800}@media(max-width:650px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.art{height:120px}.hero{padding:18px}.hero-art{font-size:42px}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.brand{font-size:19px}.nav button{font-size:12px;padding:9px}}
-</style></head><body>
-<header class="top"><div class="wrap nav"><div class="brand">yasosooooo<small>FANDOM GOODS · COLLECT WITH LOVE</small></div><div><button class="secondary" onclick="panel('track')">🔎 เช็กออเดอร์</button><button onclick="panel('cart')">🛒 ตะกร้า <span id="count">0</span></button></div></div></header>
-<main class="wrap"><section class="hero"><div><h1>ช้อปการ์ดที่ชอบ 💗</h1><p>รวมการ์ดและสินค้าแฟนด้อม<br>สั่งซื้อง่าย เช็กสถานะได้ในหน้าเดียว</p></div><div class="hero-art">🎀💌</div></section>
-<div class="note">เวอร์ชันทดลอง: ข้อมูลออเดอร์เก็บในเบราว์เซอร์ของอุปกรณ์นี้เท่านั้น ยังไม่ใช่ระบบรับชำระเงินจริงหรือฐานข้อมูลส่วนกลาง กรุณาอย่าใส่ข้อมูลส่วนตัวจริง</div>
-<h2>สินค้าแนะนำ</h2><section class="grid" id="products"></section>
-<section class="panel" id="cart"><h2>🛒 ตะกร้าสินค้า</h2><div id="items"></div><div class="summary"><div class="row"><span>ยอดรวมสินค้า</span><b id="subtotal">฿0</b></div><div class="row"><span>ค่าส่งEMS</span><b>฿35</b></div><hr><div class="row"><b>ยอดรวมสุทธิ</b><b id="cartGrand">฿35</b></div></div><button onclick="panel('checkout')">ดำเนินการสั่งซื้อ</button> <button class="secondary" onclick="panel('shop')">เลือกสินค้าต่อ</button></section>
-<section class="panel" id="checkout"><h2>📦 ข้อมูลผู้รับและชำระเงิน</h2><p class="small">กรอกข้อมูลสำหรับทดลองเท่านั้น</p><form id="form"><div class="formgrid"><div class="field"><label>ชื่อ–นามสกุลผู้รับ *</label><input required name="name" placeholder="ชื่อผู้รับ"></div><div class="field"><label>เบอร์โทรศัพท์ *</label><input required name="phone" inputmode="tel" placeholder="เบอร์โทรศัพท์"></div><div class="field full"><label>ที่อยู่จัดส่ง *</label><textarea required name="address" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด"></textarea></div><div class="field"><label>รหัสไปรษณีย์ *</label><input required name="postcode" inputmode="numeric" placeholder="รหัสไปรษณีย์"></div><div class="field"><label>ช่องทางชำระเงิน</label><select name="payment"><option>PromptPay QR (ตัวอย่าง)</option><option>โอนบัญชีธนาคาร (ตัวอย่าง)</option></select></div><div class="field full"><label>แนบสลิป (ตัวอย่างเท่านั้น)</label><input type="file" name="slip" accept="image/*"><span class="small">ไฟล์จะไม่ถูกส่งไปยังเซิร์ฟเวอร์ในเดโมนี้</span></div></div><div class="summary"><div class="row"><span>ยอดรวมสินค้า</span><b id="checkoutSub">฿0</b></div><div class="row"><span>ค่าส่งEMS</span><b>฿35</b></div><hr><div class="row"><b>ยอดที่ต้องชำระ</b><b id="checkoutGrand">฿35</b></div><p class="small">QR/ข้อมูลบัญชีจริงจะใส่หลังตั้งค่าร้านและตรวจสอบระบบชำระเงินเรียบร้อย</p></div><button type="submit">ยืนยันคำสั่งซื้อทดลอง</button></form><div id="success"></div></section>
-<section class="panel" id="track"><h2>🔎 เช็กสถานะคำสั่งซื้อ</h2><p class="small">กรอกเลขออเดอร์และเบอร์โทรศัพท์ที่ใช้สั่งซื้อ</p><form id="trackForm"><div class="formgrid"><div class="field"><label>เลขออเดอร์</label><input required name="orderId" placeholder="เลขออเดอร์"></div><div class="field"><label>เบอร์โทรศัพท์</label><input required name="phone" inputmode="tel" placeholder="เบอร์ที่ใช้สั่งซื้อ"></div></div><button>ค้นหาออเดอร์</button></form><div id="trackResult"></div></section>
-<section class="panel" id="admin"><h2>🔐 หลังร้าน (เดโม)</h2><p class="small">หน้าแอดมินตัวอย่าง ยังไม่มีระบบเข้าสู่ระบบที่ปลอดภัย</p><div id="adminOrders"></div><h3>เพิ่มสินค้าในหน้าเว็บนี้</h3><div class="formgrid"><div class="field"><label>ชื่อสินค้า</label><input id="newName"></div><div class="field"><label>ราคา (บาท)</label><input id="newPrice" type="number" min="1" placeholder="390"></div><div class="field"><label>ไอคอน</label><input id="newIcon" placeholder="💿"></div><div class="field"><label>จำนวนสต็อก</label><input id="newStock" type="number" min="0" value="10"></div></div><button onclick="addProduct()">เพิ่มสินค้าเดโม</button></section>
-<div class="row" style="justify-content:center;margin:22px 0"><button class="secondary" onclick="panel('admin')">⚙️ ทดลองหน้าจัดการร้าน</button><button class="secondary" onclick="panel('track')">📦 ติดตามพัสดุ</button></div></main><footer class="footer">yasosooooo · Fan Goods Shop<br>เวอร์ชันทดลอง</footer>
-<script>
-const SHIPPING=35,seed=[{id:1,name:'Photocard',desc:'การ์ดสะสมแฟนด้อม',price:390,stock:10,icon:'💿'},{id:2,name:'การ์ดธีร์เวฟ',desc:'การ์ดสะสมธีมสีฟ้า',price:120,stock:8,icon:'🩵'},{id:3,name:'การ์ด TEETEEPOR',desc:'สินค้าแฟนด้อม',price:150,stock:12,icon:'🎀'}];let products=JSON.parse(localStorage.getItem('ys_products')||'null')||seed,cart=JSON.parse(localStorage.getItem('ys_cart')||'{}'),orders=JSON.parse(localStorage.getItem('ys_orders')||'[]');const money=n=>'฿'+Number(n).toLocaleString('th-TH'),grand=()=>subtotal()+SHIPPING,subtotal=()=>cartData().reduce((s,x)=>s+x.p.price*x.q,0),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function save(){localStorage.setItem('ys_products',JSON.stringify(products));localStorage.setItem('ys_cart',JSON.stringify(cart));localStorage.setItem('ys_orders',JSON.stringify(orders))}function cartData(){return Object.entries(cart).map(([id,q])=>({p:products.find(p=>p.id==id),q:Number(q)})).filter(x=>x.p)}function renderProducts(){document.getElementById('products').innerHTML=products.map(p=>'<article class="card"><div class="art">'+(p.icon||'💗')+'</div><div class="body"><h3>'+esc(p.name)+'</h3><div class="muted">'+esc(p.desc||'สินค้าแฟนด้อม')+'</div><p class="price">'+money(p.price)+'</p><div class="row"><span class="muted">เหลือ '+p.stock+' ชิ้น</span><button '+(p.stock<1?'disabled':'')+' onclick="addCart('+p.id+')">ใส่ตะกร้า</button></div></div></article>').join('')}function addCart(id){cart[id]=(cart[id]||0)+1;save();renderCart();alert('เพิ่มสินค้าในตะกร้าแล้วค่ะ 💗')}function removeCart(id){delete cart[id];save();renderCart()}function renderCart(){document.getElementById('count').textContent=Object.values(cart).reduce((a,b)=>a+Number(b),0);document.getElementById('items').innerHTML=cartData().length?cartData().map(({p,q})=>'<div class="row line"><span>'+esc(p.name)+' × '+q+'</span><b>'+money(p.price*q)+'</b><button class="secondary" onclick="removeCart('+p.id+')">ลบ</button></div>').join(''):'<p>ยังไม่มีสินค้าในตะกร้าค่ะ</p>';document.getElementById('subtotal').textContent=money(subtotal());document.getElementById('cartGrand').textContent=money(grand());document.getElementById('checkoutSub').textContent=money(subtotal());document.getElementById('checkoutGrand').textContent=money(grand())}function panel(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));if(id!=='shop'){document.getElementById(id).classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}else scrollTo({top:0,behavior:'smooth'});if(id==='cart')renderCart();if(id==='checkout'){renderCart();if(!cartData().length){alert('กรุณาเลือกสินค้าก่อนค่ะ');panel('shop');return}}if(id==='admin')renderAdmin()}document.getElementById('form').addEventListener('submit',e=>{e.preventDefault();if(!cartData().length)return;let f=new FormData(e.target),id='YS'+String(Date.now()).slice(-6),o={id,phone:String(f.get('phone')).trim(),name:f.get('name'),address:f.get('address'),postcode:f.get('postcode'),payment:f.get('payment'),items:cartData().map(x=>({name:x.p.name,price:x.p.price,q:x.q})),subtotal:subtotal(),shipping:SHIPPING,total:grand(),status:'รอตรวจสอบการชำระเงิน',tracking:'',carrier:'',date:new Date().toLocaleString('th-TH')};orders.unshift(o);cart={};save();renderCart();document.getElementById('success').innerHTML='<div class="summary"><h3>สร้างออเดอร์ทดลองแล้ว 🎉</h3><p>เลขออเดอร์: <b>'+id+'</b></p><p>ยอดรวมสินค้า '+money(o.subtotal)+' + ค่าส่งEMS '+money(o.shipping)+' = <b>'+money(o.total)+'</b></p><button onclick="panel(\'track\');document.querySelector(\'#trackForm [name=orderId]\').value=\''+id+'\';document.querySelector(\'#trackForm [name=phone]\').value=\''+esc(o.phone)+'\'">ทดลองเช็กออเดอร์นี้</button></div>';e.target.reset()});document.getElementById('trackForm').addEventListener('submit',e=>{e.preventDefault();let f=new FormData(e.target),id=String(f.get('orderId')).trim().toUpperCase(),phone=String(f.get('phone')).trim(),o=orders.find(x=>x.id.toUpperCase()===id&&x.phone===phone);document.getElementById('trackResult').innerHTML=o?'<div class="summary"><div class="row"><b>ออเดอร์ '+esc(o.id)+'</b><span class="status">'+esc(o.status)+'</span></div><p>วันที่สั่งซื้อ: '+esc(o.date)+'</p>'+o.items.map(x=>'<div class="line">'+esc(x.name)+' × '+x.q+' — '+money(x.price*x.q)+'</div>').join('')+'<p>ยอดรวมสินค้า: '+money(o.subtotal??(o.total-SHIPPING))+'</p><p>ค่าส่งEMS: '+money(o.shipping??SHIPPING)+'</p><p><b>ยอดรวมสุทธิ: '+money(o.total)+'</b></p><p>ขนส่ง: '+esc(o.carrier||'รอร้านอัปเดต')+'</p><p>เลขพัสดุ: <b>'+esc(o.tracking||'ยังไม่ได้จัดส่ง')+'</b></p>'+(o.tracking?'<button onclick="window.open(\'https://www.google.com/search?q=\'+encodeURIComponent(\''+esc(o.carrier)+' '+esc(o.tracking)+' tracking\'),\'_blank\')">ค้นหาติดตามพัสดุ</button>':'')+'</div>':'<div class="summary">ไม่พบคำสั่งซื้อที่ตรงกับเลขออเดอร์และเบอร์โทรศัพท์ค่ะ</div>'});function renderAdmin(){document.getElementById('adminOrders').innerHTML=orders.length?orders.map(o=>'<div class="summary"><b>'+esc(o.id)+' · '+money(o.total)+'</b><p class="small">ผู้รับ: '+esc(o.name)+' · โทร: '+esc(o.phone)+'<br>ที่อยู่: '+esc(o.address)+' '+esc(o.postcode)+'</p><div class="field"><label>สถานะ</label><select id="st-'+o.id+'">'+['รอตรวจสอบการชำระเงิน','ชำระเงินแล้ว','กำลังแพ็กสินค้า','จัดส่งแล้ว'].map(s=>'<option '+(o.status===s?'selected':'')+'>'+s+'</option>').join('')+'</select></div><div class="formgrid"><div class="field"><label>ชื่อขนส่ง</label><input id="ca-'+o.id+'" value="'+esc(o.carrier)+'" placeholder="เช่น ไปรษณีย์ไทย"></div><div class="field"><label>เลขพัสดุ</label><input id="tr-'+o.id+'" value="'+esc(o.tracking)+'" placeholder="กรอกเลขพัสดุ"></div></div><button onclick="updateOrder(\''+o.id+'\')">บันทึกสถานะ/เลขพัสดุ</button></div>').join(''):'<p>ยังไม่มีออเดอร์ทดลอง</p>'}function updateOrder(id){let o=orders.find(x=>x.id===id);if(!o)return;o.status=document.getElementById('st-'+id).value;o.carrier=document.getElementById('ca-'+id).value;o.tracking=document.getElementById('tr-'+id).value;save();renderAdmin();alert('บันทึกข้อมูลเดโมแล้วค่ะ')}function addProduct(){let name=document.getElementById('newName').value.trim(),price=Number(document.getElementById('newPrice').value),icon=document.getElementById('newIcon').value.trim()||'💗',stock=Number(document.getElementById('newStock').value);if(!name||price<1){alert('กรอกชื่อสินค้าและราคาก่อนค่ะ');return}products.push({id:Date.now(),name,desc:'สินค้าแฟนด้อม',price,stock:Math.max(0,stock),icon});save();renderProducts();['newName','newPrice','newIcon','newStock'].forEach(id=>document.getElementById(id).value='');alert('เพิ่มสินค้าเดโมแล้วค่ะ')}renderProducts();renderCart();
-</script></body></html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>yasosooooo | ร้านการ์ดและของสะสม</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff9fc;
+      color: #493744;
+    }
+    header {
+      padding: 24px 16px;
+      text-align: center;
+      background: #ffe5f0;
+    }
+    h1 { margin: 0 0 8px; color: #bd6393; }
+    main { max-width: 1000px; margin: auto; padding: 20px 14px; }
+    #status { text-align: center; padding: 20px; }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 14px;
+    }
+    .product {
+      background: white;
+      border: 1px solid #f3dce8;
+      border-radius: 14px;
+      padding: 12px;
+      overflow: hidden;
+    }
+    .product img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #fff1f7;
+    }
+    .no-image {
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      background: #fff1f7;
+      border-radius: 10px;
+      color: #bd6393;
+    }
+    .product h3 { font-size: 16px; margin: 10px 0 6px; }
+    .description { font-size: 13px; color: #806c7a; }
+    .price { font-weight: bold; color: #c0528a; margin: 8px 0; }
+    .stock { font-size: 12px; color: #776b73; }
+    footer { text-align: center; padding: 25px; color: #9a8190; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>yasosooooo</h1>
+    <div>ร้านการ์ดและของสะสมแฟนด้อม ♡</div>
+  </header>
+
+  <main>
+    <h2>สินค้าของเรา</h2>
+    <div id="status">กำลังโหลดสินค้า...</div>
+    <div class="products" id="products"></div>
+  </main>
+
+  <footer>yasosooooo ♡</footer>
+
+  <script>
+    // ใส่ค่า Project URL และ Publishable key ของร้านตรงนี้
+    const SUPABASE_URL = 'ใส่_API_URL_ตรงนี้';
+    const SUPABASE_KEY = 'ใส่_PUBLISHABLE_KEY_ตรงนี้';
+
+    const statusBox = document.getElementById('status');
+    const productsBox = document.getElementById('products');
+
+    async function loadProducts() {
+      if (SUPABASE_URL.includes('ใส่_') ||
+          SUPABASE_KEY.includes('ใส่_')) {
+        statusBox.textContent =
+          'ยังไม่ได้ตั้งค่า Supabase URL และ Publishable key ในไฟล์เว็บ';
+        return;
+      }
+
+      try {
+        const client = window.supabase.createClient(
+          SUPABASE_URL, SUPABASE_KEY
+        );
+
+        const { data, error } = await client
+          .from('products')
+          .select('id, name, description, image_url, price, stock')
+          .eq('active', true)
+          .order('id', { ascending: false });
+
+        if (error) throw error;
+
+        statusBox.textContent = data.length
+          ? ''
+          : 'ยังไม่มีสินค้าเปิดขาย';
+
+        productsBox.replaceChildren();
+
+        data.forEach(product => {
+          const card = document.createElement('article');
+          card.className = 'product';
+
+          if (product.image_url) {
+            const img = document.createElement('img');
+            img.src = product.image_url;
+            img.alt = product.name || 'สินค้า';
+            img.loading = 'lazy';
+            card.appendChild(img);
+          } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'no-image';
+            placeholder.textContent = '♡ ไม่มีรูปสินค้า ♡';
+            card.appendChild(placeholder);
+          }
+
+          const name = document.createElement('h3');
+          name.textContent = product.name || 'สินค้า';
+          card.appendChild(name);
+
+          if (product.description) {
+            const desc = document.createElement('div');
+            desc.className = 'description';
+            desc.textContent = product.description;
+            card.appendChild(desc);
+          }
+
+          const price = document.createElement('div');
+          price.className = 'price';
+          price.textContent =
+            '฿' + Number(product.price || 0).toLocaleString('th-TH');
+          card.appendChild(price);
+
+          const stock = document.createElement('div');
+          stock.className = 'stock';
+          stock.textContent = Number(product.stock) > 0
+            ? 'คงเหลือ ' + product.stock + ' ชิ้น'
+            : 'สินค้าหมด';
+          card.appendChild(stock);
+
+          productsBox.appendChild(card);
+        });
+      } catch (error) {
+        console.error(error);
+        statusBox.textContent =
+          'โหลดสินค้าไม่สำเร็จ กรุณาตรวจสอบการตั้งค่า Supabase และสิทธิ์การอ่านข้อมูล';
+      }
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
