@@ -17,7 +17,7 @@
 <section id="orders" class="hidden"><h2>รายการสั่งซื้อในเบราว์เซอร์นี้</h2><div id="orderBody"></div></section>
 <section id="admin" class="hidden"><h2>จัดการสินค้า</h2><div class="panel"><h3 id="formTitle">เพิ่มสินค้า</h3><label class="field">ชื่อสินค้า</label><input id="pn" placeholder="เช่น Teepor"><label class="field">หมวดหมู่</label><input id="pc" placeholder="เช่น การ์ด DMD"><label class="field">รายละเอียด</label><textarea id="pd" rows="2"></textarea><label class="field">รูปสินค้าหลัก</label><input id="pi" type="file" accept="image/*"><div id="previewBox" class="hidden"><img id="preview" style="width:130px;height:130px;object-fit:contain;margin-top:10px"></div><h3 style="margin-top:20px">แบบสินค้า / ราคา / สต็อก</h3><p class="small">ตาราง products ปัจจุบันเก็บราคาและสต็อกต่อสินค้า 1 แบบเท่านั้น แนะนำให้ใช้แบบมาตรฐาน 1 แถวต่อสินค้า</p><div class="variant-row small"><span>ชื่อแบบ</span><span>ราคา ฿</span><span>สต็อก</span><span></span></div><div id="variantInputs"></div><button class="secondary" onclick="addVariantInput()">+ เพิ่มแบบสินค้า</button><div class="actions"><button onclick="saveProduct()">บันทึกสินค้า</button><button class="secondary" onclick="resetForm()">ล้างฟอร์ม</button><button class="secondary" onclick="logout()">ออกจากระบบร้าน</button></div></div><h3>สินค้าในร้าน</h3><div id="adminList"></div></section>
 </main><footer>yasosooooo · ร้านการ์ดและของสะสมแฟนด้อม</footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 "use strict";
 const SUPABASE_URL="https://ybjtekjaucpzddjuplsj.supabase.co";
